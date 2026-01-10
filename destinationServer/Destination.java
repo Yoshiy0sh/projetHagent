@@ -11,6 +11,7 @@ import java.util.Hashtable;
 
 public class Destination implements Runnable {
 
+    static final int arraySize = (int) Math.pow(10,6);
     Socket ss;
     Hashtable<String,Object> dataServer;
 
@@ -72,8 +73,16 @@ public class Destination implements Runnable {
 
     public static void main(String[] args) {
         int port = Integer.parseInt(args[0]);
+
         Hashtable<String,Object> data = new Hashtable<>();
-        int[] intArray = {1,2,3};
+
+        int[] intArray = new int[Destination.arraySize];
+        for(int i = 0; i<Destination.arraySize; i++){
+            intArray[i] = 1;
+        }
+
+        System.out.println(intArray.length);
+
         data.put("intArray", intArray);
         try {
             ServerSocket s = new ServerSocket(port);

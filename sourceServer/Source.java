@@ -47,6 +47,7 @@ public class Source implements Runnable{
 
 
     public static void main(String[] args) throws Exception {
+        long start = System.currentTimeMillis();
         Agent agentEnvoi = new AgentCount();
 
         //rechercher le .class de 
@@ -62,7 +63,10 @@ public class Source implements Runnable{
 
 
         ServerSocket s = new ServerSocket(8081);
-        while (true) { new Thread(new Source(s.accept())).start(); }        
+        new Source(s.accept()).run();
+        long end = System.currentTimeMillis();
+
+        System.out.println("Tems en ms : " + (end-start));
     }
         
 }

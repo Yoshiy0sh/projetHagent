@@ -11,7 +11,6 @@ import java.util.Hashtable;
 
 public class AgentCount implements Agent {
     private static final long serialVersionUID = 1L;
-
     private String name;
     private Node origin;
     private final Node destination1 = new Node("localhost",8082);
@@ -32,40 +31,41 @@ public class AgentCount implements Agent {
     public void main() {
         if (start) {
             start = false;
-            System.out.println("je suis reveillé c'est parti!, je vais vers " + destination1.toString());
             current = destination1;
+
+            System.out.println("déplacement vers " + destination1.toString());
+            
             try {
                 move(destination1);
             } catch (MoveException e) {
-                System.out.println("j'ai pas pu partir");
+                System.out.println("errreur lors du départ");
             }
         } else if (current.equals(destination1)) {
-            // traitement sur dataCurrentServer
-            System.out.println("on est bien arrivés à " + destination1.toString());
+            System.out.println("déplacement effectué vers " + destination1.toString());
 
             // traitement
             int[] intArray = (int[]) dataCurrentServer.get("intArray");
             data.put("result1", sum(intArray));
             
-            current = destination2;
+            
             try {
+                current = destination2;
                 move(destination2);
             } catch (MoveException e) {
-                System.out.println("on a pas pu aller à la destination2");
+                System.out.println("échec du déplacement");
             }
         } else if (current.equals(destination2)) {
-            System.out.println("on est bien arrivés à " + destination2.toString());
+            System.out.println("déplacement effectué vers " + destination2.toString());
 
             // traitement
             int[] intArray = (int[]) dataCurrentServer.get("intArray");
             data.put("result2", sum(intArray));
 
             try {
-                System.out.println("je retourne vers origin");
-                System.out.println("mes données : " + data);
+                System.out.println("retour vers origin");
                 back();
             } catch (MoveException e) {
-                System.out.println("on a pas pu revenir on est bloqués");
+                System.out.println("échec du retour");
             }
         }
     }
@@ -96,7 +96,6 @@ public class AgentCount implements Agent {
         return data;
     }
 
-    //requires Path in Hashtable
     @Override
     public void move(Node target) throws MoveException {
         try {
@@ -116,7 +115,6 @@ public class AgentCount implements Agent {
 
             out.writeUTF("AgentCount");
             out.writeInt(agentClassBytes.length);
-            System.out.println("la taille du .class" + agentClassBytes.length);
             out.write(agentClassBytes);
             out.flush();
 
@@ -141,17 +139,18 @@ public class AgentCount implements Agent {
             Socket s = new Socket(origin.getNameServ(), origin.getNbPort());
 
             OutputStream os = s.getOutputStream();
+            DataOutputStream out = new DataOutputStream(os);
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(baos);
             oos.writeObject(this);
             oos.flush();
+            oos.close();
             byte[] objectBytes = baos.toByteArray();
-
-            DataOutputStream out = new DataOutputStream(os);
 
             out.writeInt(objectBytes.length);
             out.write(objectBytes);
+            out.flush();
             s.close();
         } catch (UnknownHostException e) {
             // TODO Auto-generated catch block
@@ -161,7 +160,4 @@ public class AgentCount implements Agent {
             e.printStackTrace();
         }
     }
-
-
-    
 }
