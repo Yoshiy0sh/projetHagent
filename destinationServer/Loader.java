@@ -1,4 +1,3 @@
-package destinationServer;
 
 import java.util.*;	
 public class Loader extends ClassLoader {

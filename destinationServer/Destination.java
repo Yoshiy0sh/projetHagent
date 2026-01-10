@@ -1,4 +1,3 @@
-package destinationServer;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;

@@ -1,10 +1,7 @@
-package sourceServer;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Paths;
 import java.util.Hashtable;
-import sharedPackage.*;
-
 
 
 
