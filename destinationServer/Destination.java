@@ -28,10 +28,15 @@ public class Destination implements Runnable {
             
             String className = in.readUTF();
             int classLen = in.readInt();
-            byte[] classBytes = in.readNBytes(classLen);
+            // System.out.println("on lit " + classLen);
+            // byte[] classBytes = in.readNBytes(classLen);
+            byte[] classBytes = new byte[classLen];
+            in.readFully(classBytes);
             
             int objLen = in.readInt();
-            byte[] objBytes = in.readNBytes(objLen);
+            // byte[] objBytes = in.readNBytes(objLen);
+            byte[] objBytes = new byte[objLen];
+            in.readFully(objBytes);
             
             Loader loader = new Loader();
             loader.addClass(className, classBytes);
@@ -48,6 +53,7 @@ public class Destination implements Runnable {
             
             Agent obj = (Agent) ois.readObject();
             try {
+                obj.setAgentClassBytes(classBytes);
                 obj.setNameServer(dataServer);
                 obj.main();
             } catch (MoveException e) {
@@ -65,11 +71,12 @@ public class Destination implements Runnable {
     }
 
     public static void main(String[] args) {
+        int port = Integer.parseInt(args[0]);
         Hashtable<String,Object> data = new Hashtable<>();
         int[] intArray = {1,2,3};
         data.put("intArray", intArray);
         try {
-            ServerSocket s = new ServerSocket(8082);
+            ServerSocket s = new ServerSocket(port);
             while(true) {new Thread(new Destination(s.accept(),data)).start();}
         } catch (IOException ex) {
             System.getLogger(Destination.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);

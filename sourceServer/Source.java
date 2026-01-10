@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Hashtable;
 
@@ -19,16 +20,18 @@ public class Source implements Runnable{
 
             DataInputStream dis = new DataInputStream(is);
             int lenObj = dis.readInt();
-            byte[] objBytes = dis.readNBytes(lenObj);
+            // byte[] objBytes = dis.readNBytes(lenObj);
+            byte[] objBytes = new byte[lenObj];
+            dis.readFully(objBytes);
             
             ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(objBytes));
             
             Agent backAgent = (Agent) ois.readObject();
             Hashtable<String,Object> result = backAgent.getNameServer();
-            System.out.println("le resultat de la recherche est " + result.get("result"));
+            int resultat = (int) result.get("result1") + (int) result.get("result2");
+            System.out.println("le resultat de la recherche est " + resultat);
 
         } catch(IOException | ClassNotFoundException e){
-            e.printStackTrace();
             System.out.println("On a pas réussi à revenir");
         }
 
@@ -45,12 +48,12 @@ public class Source implements Runnable{
 
     public static void main(String[] args) throws Exception {
         Agent agentEnvoi = new AgentCount();
-        agentEnvoi.init("agent1",new Node("localhost",8081));
 
-        Hashtable<String,Object> nameServer = new Hashtable<>();
-        nameServer.put("path", Paths.get("./AgentCount.class"));
-        // nameServer.put("destination", new Node("localhost",8082));
-        agentEnvoi.setNameServer(nameServer);
+        //rechercher le .class de 
+        byte[] classBytes = Files.readAllBytes(Paths.get("./AgentCount.class"));
+
+        agentEnvoi.init("agent1",new Node("localhost",8081),classBytes);
+
         try {
             agentEnvoi.main();
         } catch (MoveException e) {
