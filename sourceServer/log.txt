@@ -1,0 +1,3 @@
+le path n'est pas sérialisable, on ne transporte pas l'information
+
+c'est compliqué de faire une destination non fixée depuis le début
