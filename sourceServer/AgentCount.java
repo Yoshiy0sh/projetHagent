@@ -1,6 +1,5 @@
 
 
-import java.util.Hashtable;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -10,6 +9,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Hashtable;
 
 public class AgentCount implements Agent {
     private static final long serialVersionUID = 1L;
@@ -19,9 +19,10 @@ public class AgentCount implements Agent {
     Node destination = new Node("localhost",8082);
     Node current;
     boolean start = true;
-    Hashtable<String, Object> data = new Hashtable<String, Object>();
+    Hashtable<String, Object> data = new Hashtable<>();
     Hashtable<String, Object> dataCurrentServer;
 
+    @Override
     public void main() {
         if (start) {
             start = false;
@@ -36,6 +37,11 @@ public class AgentCount implements Agent {
         } else if (current.equals(destination)) {
             // traitement sur dataCurrentServer
             System.out.println("on est bien arrivés à " + destination.toString());
+
+            // traitement
+            int[] intArray = (int[]) dataCurrentServer.get("intArray");
+            data.put("result", sum(intArray));
+
             try {
                 back();
             } catch (MoveException e) {
@@ -45,20 +51,32 @@ public class AgentCount implements Agent {
         }
     }
 
+    public int sum(int[] t) {
+        int sum = 0;
+        for (int i = 0; i < t.length; i++) {
+            sum += t[i];
+        }
+        return sum;
+    }
+
+    @Override
     public void init(String name, Node origin) {
         this.name = name;
         this.origin = origin;
     }
 
+    @Override
     public void setNameServer(Hashtable<String, Object> ns) {
         dataCurrentServer = ns;
     }
 
+    @Override
     public Hashtable<String, Object> getNameServer() {
         return data;
     }
 
     //requires Path in Hashtable
+    @Override
     public void move(Node target) throws MoveException {
         try {
             Socket s = new Socket(target.getNameServ(), target.getNbPort());
@@ -94,18 +112,16 @@ public class AgentCount implements Agent {
 
     }
 
+    @Override
     public void back() throws MoveException {
         try {
             Socket s = new Socket(origin.getNameServ(), origin.getNbPort());
-            Agent agEnvoi = new AgentCount();
-            agEnvoi.init(name, origin);
-            agEnvoi.setNameServer(data);
 
             OutputStream os = s.getOutputStream();
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(baos);
-            oos.writeObject(agEnvoi);
+            oos.writeObject(this);
             oos.flush();
             byte[] objectBytes = baos.toByteArray();
 
